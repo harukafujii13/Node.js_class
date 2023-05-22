@@ -1,0 +1,54 @@
+// const db = require("../service/sqlite");
+// const db = require("../service/mysql")
+const db = require("../service/postgres")
+
+module.exports = class Book {
+  constructor(title, author, comments) {
+    this.title = title;
+    this.author = author;
+    this.comments = comments;
+  }
+
+  save() {
+    //parameterized query
+    // const sql = "INSERT INTO Books (title, author, comments) VALUES ($1, $2, $3)";
+    // const params = [this.title, this.author, this.comments];
+    // return db.query(sql, params)
+
+    // query config object
+    // const query = {
+    //   text: "INSERT INTO Books (title, author, comments) VALUES ($1, $2, $3)",
+    //   values: [this.title, this.author, this.comments],
+    // }
+    // return db.query(query)
+
+    //prepared statement
+    const query = {
+      name: "insert-book",
+      text: "INSERT INTO Books (title, author, comments) VALUES ($1, $2, $3)",
+      values: [this.title, this.author, this.comments],
+    }
+    return db.query(query)
+  }
+
+  static find() {
+    const sql = "SELECT * FROM Books ORDER BY book_id DESC";
+    return db.query(sql)
+  }
+
+  static findById(id) {
+    const sql = "SELECT * FROM Books WHERE book_id = $1";
+    return db.query(sql, [id])
+  }
+
+  static updateOne(data) {
+    const sql = "UPDATE Books SET title = $1, author = $2, comments = $3 WHERE (book_id = $4)";
+    const params = [data.title, data.author, data.comments, data.id];
+    return db.query(sql, params)
+  }
+
+  static deleteOne(id) {
+    const sql = "DELETE FROM Books WHERE book_id = $1";
+    return db.query(sql, [id])
+  }
+};
